@@ -31,6 +31,12 @@ public class HospitalDataBase {
         allHospitals.add(new Hospital("CHUM", true, 45.51309376029247, -73.5576694104104, 0));
         allHospitals.add(new Hospital("Catherine Booth Hospital", true, 45.465080168596934, -73.6361520918609, 0));
 
+        //changes made here, we need to add all the valid hospital to the allValidHospitals field
+        for (Hospital h: allHospitals) {
+            if (h.hasSpots) {
+                allValidHospitals.add(h);
+            }
+        }
     }
 
 
