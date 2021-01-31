@@ -17,7 +17,7 @@ public class HospitalDataBase {
 
 
     // Constructor
-    public HospitalDataBase(Double x, Double y) {
+    public HospitalDataBase(Double x, Double y) throws JSONException {
 
         this.allHospitals = new ArrayList<Hospital>();
         this.allValidHospitals = new ArrayList<Hospital>();
@@ -32,11 +32,7 @@ public class HospitalDataBase {
         allHospitals.add(new Hospital("Catherine Booth Hospital", true, 45.465080168596934, -73.6361520918609, 0));
 
         //changes made here, we need to add all the valid hospital to the allValidHospitals field
-        for (Hospital h: allHospitals) {
-            if (h.hasSpots) {
-                allValidHospitals.add(h);
-            }
-        }
+        sortHospitals();
     }
 
 
@@ -79,6 +75,7 @@ public class HospitalDataBase {
 
         for (Hospital h : allValidHospitals) {
             arrayString.add(h.getName());
+            System.out.println(h.getName());
         }
         return arrayString;
     }
@@ -128,12 +125,16 @@ public class HospitalDataBase {
 
             String url = this.generateUrl();
             JSONObject json = new JSONObject(url);
+            /*** test ***/
+            System.out.println("url is: " + url);
 
             // just gonna get the first route
             JSONObject duration = json.getJSONArray("routes").getJSONObject(0).getJSONObject("duration");
 
             this.time = duration.getInt("value");
             this.timeText = duration.getString("text");
+            /*** test ***/
+            System.out.println("travel time is : " + this.timeText);
         }
 
         public int getMinutesToArrive() throws JSONException {

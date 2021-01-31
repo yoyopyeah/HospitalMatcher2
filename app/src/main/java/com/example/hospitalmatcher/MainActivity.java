@@ -36,24 +36,39 @@ public class MainActivity extends AppCompatActivity {
         double userLatitude = locationGPS.getLatitude();
 
         // create a new HospitalDataBase
-        HospitalDataBase dataBase = new HospitalDataBase(userLatitude, userLongitude);
-
-
-        // not sure what this is
-        TextView userLocation = (TextView) findViewById(R.id.text1);
+        HospitalDataBase dataBase = null;
+        try {
+            dataBase = new HospitalDataBase(userLatitude, userLongitude);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         // show user's location on App screen
+        TextView userLocation = (TextView) findViewById(R.id.text1);
         userLocation.setText(userLongitude + "\t" + userLatitude);
 
-        // not sure what this is
+        String nearestHospital = dataBase.getHospitalsNames().get(0);
+
         TextView distanceText = (TextView) findViewById(R.id.text3);
+        distanceText.setText("The nearest hospital is:" + nearestHospital);
 
 
-        String nearest = dataBase.getHospitalsNames().get(0);
-        distanceText.setText("The nearest hospital is:" + nearest);
-        //onclick
-
+        //todo: activate the button, setting up onclick
 
     }
+
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+//        if (requestingLocationUpdates) {
+//            startLocationUpdates();
+//        }
+//    }
+//
+//    private void startLocationUpdates() {
+//        fusedLocationClient.requestLocationUpdates(locationRequest,
+//                locationCallback,
+//                Looper.getMainLooper());
+//    }
 
 }
