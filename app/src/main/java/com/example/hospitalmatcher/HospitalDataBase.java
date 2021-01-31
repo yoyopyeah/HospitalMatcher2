@@ -1,5 +1,9 @@
 package com.example.hospitalmatcher;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -17,8 +21,8 @@ public class HospitalDataBase {
 
         this.allHospitals = new ArrayList<Hospital>();
         this.allValidHospitals = new ArrayList<Hospital>();
-        this.currentX = x;
-        this.currentY = y;
+        this.currentX = x; // user Latitude
+        this.currentY = y; // user Longitude
 
         // create manually 5 Montreal hospitals
         allHospitals.add(new Hospital("Montreal General Hospital", true, 45.49752494338774, -73.58853601085194, 0));
@@ -29,23 +33,29 @@ public class HospitalDataBase {
 
     }
 
+
+
     public ArrayList<Hospital> getAllHospitals(){
         return allHospitals;
     }
 
 
-    public void sortHospitals() {
+    // sort hospitals by availability and time
+    public void sortHospitals() throws JSONException {
+
+        // if the hospital is available, then add it to the list of Valid Hospitals
         for (Hospital h : allHospitals) {
             if (h.isHasSpots()) {
                 allValidHospitals.add(h);
             }
         }
+
         // sort the valid hospitals according to their times
         // insertion sort
         for (int i = 0; i < allValidHospitals.size(); i++) {
-
             Hospital tmpHospital = allValidHospitals.get(i);
             int k = i;
+            //todo: update getMinutesToArrive by using Google Map API
             while (k > 0 && tmpHospital.getMinutesToArrive() < allValidHospitals.get(k - 1).getMinutesToArrive()) {
                 allValidHospitals.set(k, allValidHospitals.get(k - 1));
                 k--;
@@ -54,8 +64,10 @@ public class HospitalDataBase {
         }
     }
 
+
     // return the array list that contains the names of hospitals in order of how
     // long it would take to get to the hospital
+    //todo: getHospitalNames to show on the app
     public ArrayList<String> getHospitalsNames() {
         ArrayList<String> arrayString = new ArrayList<String>();
 
@@ -65,6 +77,7 @@ public class HospitalDataBase {
         return arrayString;
     }
 
+
     // return allValidHospitals
     public ArrayList<Hospital> getAllValidHospitals() {
         return allValidHospitals;
@@ -73,9 +86,10 @@ public class HospitalDataBase {
     private class Hospital {
         private String name;
         private boolean hasSpots;
-        private Double x;
-        private Double y;
+        private Double x; //latitude
+        private Double y; //longitude
         private int time; // how far away is the hospital in minutes
+        private String timeText; // verbose time
 
         public Hospital(String name, boolean hasSpots, Double x, Double y, int time) {
             this.name = name;
@@ -100,15 +114,43 @@ public class HospitalDataBase {
         }
 
 
-        public int getMinutesToArrive() {
+        /*
+        Google Map API return multiple routes. Due to time limits, we are only getting the first route
+         */
+        //todo: updateMinutesToArrive
+        public void updateMinutesToArrive() throws JSONException {
+
+            String url = this.generateUrl();
+            JSONObject json = new JSONObject(url);
+
+            // just gonna get the first route
+            JSONObject duration = json.getJSONArray("routes").getJSONObject(0).getJSONObject("duration");
+
+            this.time = duration.getInt("value");
+            this.timeText = duration.getString("text");
+        }
+
+        public int getMinutesToArrive() throws JSONException {
+            this.updateMinutesToArrive();
             return time;
         }
 
-        public void setMinutesToArrive(int minutesToArrive) {
-            this.time = minutesToArrive;
-        }
-
         // setters and getters end
+
+
+        /******** FOR API ***********/
+        // generate the url to call API
+        public String generateUrl() {
+            String baseUrl="https://maps.googleapis.com/maps/api/directions/json?";
+            String APIKey="AIzaSyCwgrS6lWwgjZlIpb3-LRsdY6A9edZ3ws0";
+
+            String origin = "origin=" + Double.toString(currentY) + "," + Double.toString(currentX);
+            String destination = "destination=" + Double.toString(this.y) + "," + Double.toString(this.x);
+
+            String url = baseUrl + origin + "&" + destination + "&key=" + APIKey;
+
+            return url;
+        }
     }
 
 }
