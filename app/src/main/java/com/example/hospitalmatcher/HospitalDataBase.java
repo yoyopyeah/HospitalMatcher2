@@ -1,4 +1,8 @@
+//project by Aly Saleh, Yufeng Peng, Zhihao Huang
+
 package com.example.hospitalmatcher;
+
+import android.location.Location;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -12,24 +16,27 @@ public class HospitalDataBase {
     private ArrayList<Hospital> allHospitals;
     private ArrayList<Hospital> allValidHospitals;
     // current location of the user
-    private Double currentX;
-    private Double currentY;
+    private float currentX;
+    private float currentY;
+    //added a new field here
+    private Hospital nearestHospital;
 
 
     // Constructor
-    public HospitalDataBase(Double x, Double y) {
+    public HospitalDataBase(float x, float y) {
 
         this.allHospitals = new ArrayList<Hospital>();
         this.allValidHospitals = new ArrayList<Hospital>();
         this.currentX = x; // user Latitude
         this.currentY = y; // user Longitude
 
+
         // create manually 5 Montreal hospitals
-        allHospitals.add(new Hospital("Montreal General Hospital", true, 45.49752494338774, -73.58853601085194, 0));
-        allHospitals.add(new Hospital("Jewish General Hospital", true, 45.49696267784886, -73.63021013836273, 0));
-        allHospitals.add(new Hospital("St. Mary's Hospital", true, 45.4951352243607, -73.62383807250717, 0));
-        allHospitals.add(new Hospital("CHUM", true, 45.51309376029247, -73.5576694104104, 0));
-        allHospitals.add(new Hospital("Catherine Booth Hospital", true, 45.465080168596934, -73.6361520918609, 0));
+        allHospitals.add(new Hospital("Montreal General Hospital", true, 45.49752494338774, -73.58853601085194, userDistance(x, y, 45.49752494338774f, -73.58853601085194f) ));
+        allHospitals.add(new Hospital("Jewish General Hospital", true, 45.49696267784886, -73.63021013836273, userDistance(x, y, 45.49696267784886f, -73.63021013836273f)));
+        allHospitals.add(new Hospital("St. Mary's Hospital", true, 45.4951352243607, -73.62383807250717, userDistance(x, y, 45.4951352243607f, -73.62383807250717f)));
+        allHospitals.add(new Hospital("CHUM", true, 45.51309376029247, -73.5576694104104, userDistance(x, y, 45.51309376029247f, -73.5576694104104f)));
+        allHospitals.add(new Hospital("Catherine Booth Hospital", true, 45.465080168596934, -73.6361520918609, userDistance(x, y, 45.465080168596934f, -73.6361520918609f)));
 
         //changes made here, we need to add all the valid hospital to the allValidHospitals field
         for (Hospital h: allHospitals) {
@@ -37,8 +44,35 @@ public class HospitalDataBase {
                 allValidHospitals.add(h);
             }
         }
+
+        try {
+            this.sortHospitals();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
+    public static float userDistance(float ux, float uy, float hx, float hy) {
+        Location user = new Location("");
+        user.setLongitude(ux);
+        user.setLatitude(uy);
+
+        Location theH = new Location("");
+        theH.setLongitude(hx);
+        theH.setLatitude(hy);
+
+        float distance = user.distanceTo(theH);
+        return distance;
+
+    }
+
+    public Hospital getNearestHospital() {
+        return nearestHospital;
+    }
+
+    public String getNearestHospitalName() {
+        return nearestHospital.getName();
+    }
 
 
     public ArrayList<Hospital> getAllHospitals(){
@@ -49,15 +83,40 @@ public class HospitalDataBase {
     // sort hospitals by availability and time
     public void sortHospitals() throws JSONException {
 
+        float minTime = allValidHospitals.get(0).getTime();
+        nearestHospital = allValidHospitals.get(0);
+
+        for (Hospital h : allValidHospitals) {
+            if (h.getTime() <= minTime) {
+                minTime = h.getTime();
+                nearestHospital = h;
+            }
+        }
+
         // if the hospital is available, then add it to the list of Valid Hospitals
+        /* This is now in the constructor
         for (Hospital h : allHospitals) {
             if (h.isHasSpots()) {
                 allValidHospitals.add(h);
             }
         }
+        */
+        //instead of sorting the entire thing, i will just find the min time hospital and store it in nearestHospital field
 
+        /*
+        int minTime = allValidHospitals.get(0).getMinutesToArrive();
+        nearestHospital = allValidHospitals.get(0);
+
+        for (Hospital Q : allValidHospitals) {
+            if (Q.getMinutesToArrive() <= minTime) {
+                nearestHospital = Q;
+                minTime = Q.getMinutesToArrive();
+            }
+        }
+        */
         // sort the valid hospitals according to their times
         // insertion sort
+        /*
         for (int i = 0; i < allValidHospitals.size(); i++) {
             Hospital tmpHospital = allValidHospitals.get(i);
             int k = i;
@@ -67,7 +126,7 @@ public class HospitalDataBase {
                 k--;
             }
             allValidHospitals.set(k, tmpHospital);
-        }
+        }*/
     }
 
 
@@ -94,10 +153,16 @@ public class HospitalDataBase {
         private boolean hasSpots;
         private Double x; //latitude
         private Double y; //longitude
-        private int time; // how far away is the hospital in minutes
+
+
+        private float time; // how far away is the hospital in minutes
         private String timeText; // verbose time
 
-        public Hospital(String name, boolean hasSpots, Double x, Double y, int time) {
+        public float getTime() {
+            return time;
+        }
+
+        public Hospital(String name, boolean hasSpots, Double x, Double y, float time) {
             this.name = name;
             this.hasSpots = hasSpots;
             this.x = x;
@@ -114,6 +179,7 @@ public class HospitalDataBase {
         public boolean isHasSpots() {
             return hasSpots;
         }
+
 
         public void setHasSpots(boolean hasSpots) {
             this.hasSpots = hasSpots;
@@ -136,7 +202,7 @@ public class HospitalDataBase {
             this.timeText = duration.getString("text");
         }
 
-        public int getMinutesToArrive() throws JSONException {
+        public double getMinutesToArrive() throws JSONException {
             this.updateMinutesToArrive();
             return time;
         }

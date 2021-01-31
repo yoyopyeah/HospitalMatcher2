@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         double userLatitude = locationGPS.getLatitude();
 
         // create a new HospitalDataBase
-        HospitalDataBase dataBase = new HospitalDataBase(userLatitude, userLongitude);
+        HospitalDataBase dataBase = new HospitalDataBase((float) userLatitude, (float) userLongitude);
 
 
         // not sure what this is
@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
         TextView distanceText = (TextView) findViewById(R.id.text3);
 
 
-        String nearest = dataBase.getHospitalsNames().get(0);
+        String nearest = dataBase.getNearestHospitalName();
         distanceText.setText("The nearest hospital is:" + nearest);
         //onclick
 
