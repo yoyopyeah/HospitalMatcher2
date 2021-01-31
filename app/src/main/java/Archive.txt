@@ -44,3 +44,31 @@ Google API Key: AIzaSyCwgrS6lWwgjZlIpb3-LRsdY6A9edZ3ws0
             hospitalLocation.setLongitude(37d);
             float distance = locationGPS.distanceTo(hospitalLocation);
     */
+
+
+    URLConnection request = new URL(this.generateUrl()).openConnection();
+                request.connect();
+                InputStreamReader inputStreamReader = new InputStreamReader((InputStream) request.getContent());
+
+                // map to GSON objects
+                JsonElement root = new JsonParser().parse(inputStreamReader);
+
+
+
+
+
+    try {
+    String key = "32899195bbb14cb7a4dc723a86c8cd8d";
+    String url = "https://randommer.io/api/Name?nameType=firstname&quantity="+howMany;
+    HttpRequest request = HttpRequest.newBuilder().GET()
+    .uri(URI.create(url))
+    .header("X-Api-key", key)
+    .build();
+    HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+    JSONArray nameArray = new JSONArray(response.body());
+    return JSONStringArrayToStringArray(nameArray);
+    } catch (Exception e) {
+    System.out.println("There was an error fetching data.");
+    e.printStackTrace();
+    }
+

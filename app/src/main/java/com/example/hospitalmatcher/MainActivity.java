@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
         HospitalDataBase dataBase = null;
         try {
             dataBase = new HospitalDataBase(userLatitude, userLongitude);
-        } catch (JSONException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

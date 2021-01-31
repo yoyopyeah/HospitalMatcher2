@@ -1,11 +1,21 @@
 package com.example.hospitalmatcher;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.json.*;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Scanner;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
 
 public class HospitalDataBase {
 
@@ -17,7 +27,7 @@ public class HospitalDataBase {
 
 
     // Constructor
-    public HospitalDataBase(Double x, Double y) throws JSONException {
+    public HospitalDataBase(Double x, Double y) throws JSONException, IOException {
 
         this.allHospitals = new ArrayList<Hospital>();
         this.allValidHospitals = new ArrayList<Hospital>();
@@ -43,7 +53,7 @@ public class HospitalDataBase {
 
 
     // sort hospitals by availability and time
-    public void sortHospitals() throws JSONException {
+    public void sortHospitals() throws JSONException, IOException {
 
         // if the hospital is available, then add it to the list of Valid Hospitals
         for (Hospital h : allHospitals) {
@@ -121,15 +131,23 @@ public class HospitalDataBase {
         Google Map API return multiple routes. Due to time limits, we are only getting the first route
          */
         //todo: updateMinutesToArrive
-        public void updateMinutesToArrive() throws JSONException {
+        public void updateMinutesToArrive() throws JSONException, IOException {
+            OkHttpClient client = new OkHttpClient().newBuilder()
+                    .build();
+            Request request = new Request.Builder()
+                    .url(this.generateUrl())
+                                    .method("GET", null)
+                                    .build();
+            Response response = client.newCall(request).execute();
 
-            String url = this.generateUrl();
-            JSONObject json = new JSONObject(url);
-            /*** test ***/
-            System.out.println("url is: " + url);
+
+            // build a JSON object
+            JSONObject obj = new JSONObject(response.body().string());
+            if (! obj.getString("status").equals("OK"))
+                return;
 
             // just gonna get the first route
-            JSONObject duration = json.getJSONArray("routes").getJSONObject(0).getJSONObject("duration");
+            JSONObject duration = obj.getJSONArray("routes").getJSONObject(0).getJSONObject("duration");
 
             this.time = duration.getInt("value");
             this.timeText = duration.getString("text");
@@ -137,7 +155,7 @@ public class HospitalDataBase {
             System.out.println("travel time is : " + this.timeText);
         }
 
-        public int getMinutesToArrive() throws JSONException {
+        public int getMinutesToArrive() throws JSONException, IOException {
             this.updateMinutesToArrive();
             return time;
         }
