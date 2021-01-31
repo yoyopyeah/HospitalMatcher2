@@ -1,0 +1,46 @@
+Google API Key: AIzaSyCwgrS6lWwgjZlIpb3-LRsdY6A9edZ3ws0
+
+
+// pull travel information from API
+    private String getTravelStatus(double longitude, double latitude) {
+        String status ="";
+        JSONObject obj = null;
+        try {
+            obj = new JSONObject(generateUrl(0, 0, 0, 0));
+            status = obj.getString("status");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        HospitalDataBase data = new HospitalDataBase(0.0, 0.0);
+//        ArrayList<HospitalDataBase.Hospital> hospitals = data.getAllValidHospitals();
+
+//        for (Hospital h : hospitals) {
+//
+//        }
+
+        return status;
+    }
+
+
+    // generate the url to call API
+    public static String generateUrl(double userLongitude, double userLatitude, double HLong, double HLat) {
+        String baseUrl="https://maps.googleapis.com/maps/api/directions/json?";
+        String APIKey="AIzaSyCwgrS6lWwgjZlIpb3-LRsdY6A9edZ3ws0";
+
+        String origin = "origin=" + Double.toString(userLongitude) + "," + Double.toString(userLatitude);
+        String destination = "destination=" + Double.toString(HLong) + "," + Double.toString(HLat);
+
+        String url = baseUrl + origin + "&" + destination + "&key=" + APIKey;
+
+        return url;
+    }
+
+
+    /*
+            //calculating the linear distance in meters between points using distanceTo
+            Location hospitalLocation = new Location(""); //info on how constructor works here: https://stackoverflow.com/questions/17983865/making-a-location-object-in-android-with-latitude-and-longitude-values
+            hospitalLocation.setLatitude(-120d); //insert latitude here
+            hospitalLocation.setLongitude(37d);
+            float distance = locationGPS.distanceTo(hospitalLocation);
+    */
