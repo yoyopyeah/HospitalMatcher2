@@ -39,20 +39,19 @@ public class MainActivity extends AppCompatActivity {
         HospitalDataBase dataBase = new HospitalDataBase((float) userLatitude, (float) userLongitude);
 
 
-        // not sure what this is
+        
         TextView userLocation = (TextView) findViewById(R.id.text1);
 
         // show user's location on App screen
         userLocation.setText(userLongitude + "\t" + userLatitude);
 
-        // not sure what this is
+        
         TextView distanceText = (TextView) findViewById(R.id.text3);
 
 
         String nearest = dataBase.getNearestHospitalName();
         distanceText.setText("The nearest hospital is:" + nearest);
-        //onclick
-
+       
 
     }
 
