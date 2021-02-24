@@ -1,5 +1,5 @@
 # HospitalMatcher2
-Our project for HacktheNorth 2021.
+Our project for McHacks 2021.
 
 ## Inspiration
 In many developing countries, for example, Cairo, you often need to drive to a hospital yourself in case of an emergency. 
